@@ -105,7 +105,15 @@ export class ArtifactPullsComponent {
   }
 
   protected resetFilters() {
-    this.filterForm.reset();
+    this.filterForm.reset({
+      customerOrganizationId: '',
+      userAccountId: '',
+      remoteAddress: '',
+      artifactId: '',
+      artifactVersionId: '',
+      from: '',
+      to: '',
+    });
   }
 
   protected exportCsv() {
