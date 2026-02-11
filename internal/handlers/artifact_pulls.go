@@ -52,7 +52,8 @@ func ArtifactPullsRouter(r chiopenapi.Router) {
 		}{})).
 		With(option.Response(http.StatusOK, []api.ArtifactPullFilterOption{}))
 	r.Get("/export", exportArtifactPullsHandler()).
-		With(option.Description("Export artifact version pulls as CSV"))
+		With(option.Description("Export artifact version pulls as CSV")).
+		With(option.Response(http.StatusOK, []byte{}))
 }
 
 func parseArtifactPullFilters(r *http.Request, orgID uuid.UUID) (types.ArtifactVersionPullFilter, error) {
@@ -82,6 +83,8 @@ func parseArtifactPullFilters(r *http.Request, orgID uuid.UUID) (types.ArtifactV
 		// use default
 	} else if err != nil {
 		return filter, fmt.Errorf("count must be a number")
+	} else if count < 1 || count > 1000 {
+		return filter, fmt.Errorf("count must be between 1 and 1000")
 	} else {
 		filter.Count = count
 	}
@@ -227,11 +230,14 @@ func exportArtifactPullsHandler() http.HandlerFunc {
 		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
 		csvWriter := csv.NewWriter(w)
-		_ = csvWriter.Write([]string{"Date", "Customer", "User", "Email", "Address", "Artifact", "Version"})
+		if err := csvWriter.Write([]string{"Date", "Customer", "User", "Email", "Address", "Artifact", "Version"}); err != nil {
+			log.Warn("could not write CSV header", zap.Error(err))
+			return
+		}
 
 		for _, pull := range pulls {
 			apiPull := mapping.ArtifactVersionPullToAPI(pull)
-			_ = csvWriter.Write([]string{
+			if err := csvWriter.Write([]string{
 				apiPull.CreatedAt.Format(time.RFC3339),
 				ptrOrEmpty(apiPull.CustomerOrganizationName),
 				ptrOrEmpty(apiPull.UserAccountName),
@@ -239,10 +245,16 @@ func exportArtifactPullsHandler() http.HandlerFunc {
 				ptrOrEmpty(apiPull.RemoteAddress),
 				apiPull.Artifact.Name,
 				apiPull.ArtifactVersion.Name,
-			})
+			}); err != nil {
+				log.Warn("could not write CSV row", zap.Error(err))
+				return
+			}
 		}
 
 		csvWriter.Flush()
+		if err := csvWriter.Error(); err != nil {
+			log.Warn("CSV flush error", zap.Error(err))
+		}
 	}
 }
 

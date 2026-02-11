@@ -211,12 +211,12 @@ export class ArtifactPullsComponent {
       filters.artifactVersionId = version;
     }
     if (from) {
-      filters.after = new Date(from);
+      const [y, m, d] = from.split('-').map(Number);
+      filters.after = new Date(y, m - 1, d);
     }
     if (to) {
-      const toDate = new Date(to);
-      toDate.setHours(23, 59, 59, 999);
-      filters.before = toDate;
+      const [y, m, d] = to.split('-').map(Number);
+      filters.before = new Date(y, m - 1, d, 23, 59, 59, 999);
     }
     return filters;
   }
