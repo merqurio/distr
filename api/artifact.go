@@ -25,3 +25,15 @@ type ArtifactVersionPullResponse struct {
 	Artifact                 types.Artifact        `json:"artifact"`
 	ArtifactVersion          types.ArtifactVersion `json:"artifactVersion"`
 }
+
+type ArtifactPullFilterOption struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type ArtifactVersionPullFilterOptions struct {
+	CustomerOrganizations []ArtifactPullFilterOption `json:"customerOrganizations"`
+	UserAccounts          []ArtifactPullFilterOption `json:"userAccounts"`
+	RemoteAddresses       []string                   `json:"remoteAddresses"`
+	Artifacts             []ArtifactPullFilterOption `json:"artifacts"`
+}

@@ -1,6 +1,93 @@
 <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 antialiased">
   <div class="mx-auto max-w-screen-2xl px-4 lg:px-12">
     <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+      @if (filterOptions$ | async; as options) {
+        <div class="p-4 flex flex-wrap items-end gap-4 border-b border-gray-200 dark:border-gray-600">
+          <div>
+            <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-400">From</label>
+            <input
+              type="date"
+              [formControl]="dateFromFilter"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+          </div>
+          <div>
+            <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-400">To</label>
+            <input
+              type="date"
+              [formControl]="dateToFilter"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+          </div>
+          <div>
+            <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-400">Customer</label>
+            <select
+              [formControl]="customerOrgFilter"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+              <option value="">All</option>
+              @for (opt of options.customerOrganizations; track opt.id) {
+                <option [value]="opt.id">{{ opt.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-400">User</label>
+            <select
+              [formControl]="userAccountFilter"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+              <option value="">All</option>
+              @for (opt of options.userAccounts; track opt.id) {
+                <option [value]="opt.id">{{ opt.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-400">Address</label>
+            <select
+              [formControl]="remoteAddressFilter"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+              <option value="">All</option>
+              @for (addr of options.remoteAddresses; track addr) {
+                <option [value]="addr">{{ addr }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-400">Artifact</label>
+            <select
+              [formControl]="artifactFilter"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+              <option value="">All</option>
+              @for (opt of options.artifacts; track opt.id) {
+                <option [value]="opt.id">{{ opt.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-400">Version</label>
+            <select
+              [formControl]="artifactVersionFilter"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed">
+              <option value="">All</option>
+              @for (opt of versionOptions$ | async; track opt.id) {
+                <option [value]="opt.id">{{ formatVersionName(opt.name) }}</option>
+              }
+            </select>
+          </div>
+          <div class="ml-auto">
+            <button
+              type="button"
+              (click)="exportCsv()"
+              [disabled]="isExporting"
+              class="py-2 px-3 flex items-center text-sm font-medium text-center text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              <fa-icon [icon]="faDownload" class="mr-2"></fa-icon>
+              @if (isExporting) {
+                Exporting...
+              } @else {
+                Export CSV
+              }
+            </button>
+          </div>
+        </div>
+      }
       <div class="overflow-x-auto">
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <thead
@@ -11,6 +98,7 @@
               <th scope="col" class="p-4">User</th>
               <th scope="col" class="p-4">Address</th>
               <th scope="col" class="p-4">Artifact</th>
+              <th scope="col" class="p-4">Version</th>
             </tr>
           </thead>
           <tbody>
@@ -41,7 +129,12 @@
                   }
                 </td>
                 <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                  {{ pull.artifact.name + '@' + pull.artifactVersion.name }}
+                  {{ pull.artifact.name }}
+                </td>
+                <td
+                  class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                  [title]="pull.artifactVersion.name">
+                  {{ formatVersionName(pull.artifactVersion.name) }}
                 </td>
               </tr>
             }
@@ -52,7 +145,7 @@
         <div class="flex justify-center px-2 py-4">
           <button
             type="button"
-            class="py-2 px-3 flex items-center text-sm font-medium text-center text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 ng-tns-c1827770807-1 ng-star-inserted"
+            class="py-2 px-3 flex items-center text-sm font-medium text-center text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
             (click)="showMore()">
             Show more
           </button>
