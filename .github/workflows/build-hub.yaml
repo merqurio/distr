@@ -22,8 +22,7 @@ jobs:
         edition:
           - name: community
             suffix: '-ce'
-            images: |
-              ghcr.io/merqurio/distr-ce
+            images: ghcr.io/merqurio/distr-ce
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,7 +56,7 @@ jobs:
         run: pnpm run build:${{ matrix.edition.name }} --source-map=false
 
       - name: Generate SBOM for frontend project
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@v0.17.9
         with:
           file: pnpm-lock.yaml
           output-file: dist/frontend.spdx.json
