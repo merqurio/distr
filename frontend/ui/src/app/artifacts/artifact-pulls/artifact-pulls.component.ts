@@ -145,7 +145,7 @@ export class ArtifactPullsComponent {
   protected formatVersionName(name: string): string {
     const shaPrefix = 'sha256:';
     if (name.startsWith(shaPrefix)) {
-      return shaPrefix + name.substring(shaPrefix.length, shaPrefix.length + 8);
+      return name.substring(0, shaPrefix.length + 10);
     }
     return name;
   }

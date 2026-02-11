@@ -105,11 +105,7 @@ func parseArtifactPullFilters(r *http.Request, orgID uuid.UUID) (types.ArtifactV
 		filter.UserAccountID = &id
 	}
 
-	if addr, err := QueryParam(r, "remoteAddress", parseString); errors.Is(err, ErrParamNotDefined) {
-		// use default
-	} else if err != nil {
-		return filter, err
-	} else {
+	if addr := r.FormValue("remoteAddress"); addr != "" 
 		filter.RemoteAddress = &addr
 	}
 
