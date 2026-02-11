@@ -230,7 +230,8 @@ func exportArtifactPullsHandler() http.HandlerFunc {
 		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
 		csvWriter := csv.NewWriter(w)
-		if err := csvWriter.Write([]string{"Date", "Customer", "User", "Email", "Address", "Artifact", "Version"}); err != nil {
+		header := []string{"Date", "Customer", "User", "Email", "Address", "Artifact", "Version"}
+		if err := csvWriter.Write(header); err != nil {
 			log.Warn("could not write CSV header", zap.Error(err))
 			return
 		}
