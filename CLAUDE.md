@@ -188,3 +188,4 @@ API routes are defined in `internal/routing/`. Routes are grouped by authenticat
 - If you read code that doesn't follow these rules, please fix it.
 - If you see any typos, or spelling mistakes, please fix them.
 - If you fetch data from GitHub always use the GitHub cli (`gh`) instead of the web interface.
+- When you resolve merge conflicts (whether during a merge or rebase), always ensure that the conflict resolutions are committed before continuing, or at least prompt the user to commit them, so that unrelated new changes are not unintentionally included in that commit.
